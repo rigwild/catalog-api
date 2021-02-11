@@ -1,410 +1,519 @@
 {
-  "info": {
-    "_postman_id": "06cdc4b9-0f53-4dbd-b6cd-255ec19f2dad",
-    "name": "Catalog_API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "/users",
-      "item": [
-        {
-          "name": "/",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/users",
-              "host": ["{{api}}"],
-              "path": ["users"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"{{$randomUserName}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"age\": \"{{$randomInt}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/users",
-              "host": ["{{api}}"],
-              "path": ["users"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/users/1",
-              "host": ["{{api}}"],
-              "path": ["users", "1"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id/playlist",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/users/1/playlist",
-              "host": ["{{api}}"],
-              "path": ["users", "1", "playlist"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id/suggestions",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/users/1/suggestions",
-              "host": ["{{api}}"],
-              "path": ["users", "1", "suggestions"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id/playlist",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": ["const x = 1 + Math.floor(Math.random() * 30)\r", "pm.globals.set('randomNumber', x);\r", ""],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"movieId\": {{randomNumber}}\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/users/1/playlist",
-              "host": ["{{api}}"],
-              "path": ["users", "1", "playlist"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id/suggestions",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": ["const x = 1 + Math.floor(Math.random() * 30)\r", "pm.globals.set('randomNumber', x);\r", ""],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"movieId\": {{randomNumber}}\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/users/1/suggestions",
-              "host": ["{{api}}"],
-              "path": ["users", "1", "suggestions"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id/playlist Copy",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/users/1/playlist",
-              "host": ["{{api}}"],
-              "path": ["users", "1", "playlist"]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "/movies",
-      "item": [
-        {
-          "name": "/",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/movies",
-              "host": ["{{api}}"],
-              "path": ["movies"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"title\": \"{{$randomNoun}}\",\r\n  \"director\": 2,\r\n  \"ageRating\": 16,\r\n  \"durationMinutes\": {{$randomInt}},\r\n  \"popularity\": 9.1,\r\n  \"casting\": [1,2,3],\r\n  \"genres\": [1, 2, 3]\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/movies",
-              "host": ["{{api}}"],
-              "path": ["movies"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/movies/1",
-              "host": ["{{api}}"],
-              "path": ["movies", "1"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"title\": \"{{$randomNoun}}\",\r\n  \"director\": 1,\r\n  \"ageRating\": 16,\r\n  \"durationMinutes\": {{$randomInt}},\r\n  \"popularity\": 9.1,\r\n  \"casting\": [1,2,3],\r\n  \"genres\": [1, 2, 3]\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/movies/1",
-              "host": ["{{api}}"],
-              "path": ["movies", "1"]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "/genres",
-      "item": [
-        {
-          "name": "/",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/genres",
-              "host": ["{{api}}"],
-              "path": ["genres"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"{{$randomNoun}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/genres",
-              "host": ["{{api}}"],
-              "path": ["genres"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/genres/1",
-              "host": ["{{api}}"],
-              "path": ["genres", "1"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"{{$randomNoun}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/genres/1",
-              "host": ["{{api}}"],
-              "path": ["genres", "1"]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "/people",
-      "item": [
-        {
-          "name": "/",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/people",
-              "host": ["{{api}}"],
-              "path": ["people"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"{{$randomNoun}}\",\r\n  \"job\": \"actor\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/people",
-              "host": ["{{api}}"],
-              "path": ["people"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{api}}/people/1",
-              "host": ["{{api}}"],
-              "path": ["people", "1"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "/:id",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"name\": \"{{$randomNoun}}\",\r\n  \"job\": \"director\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{api}}/people/1",
-              "host": ["{{api}}"],
-              "path": ["people", "1"]
-            }
-          },
-          "response": []
-        }
-      ]
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [""]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [""]
-      }
-    }
-  ],
-  "variable": [
-    {
-      "key": "api",
-      "value": "http://localhost:5000"
-    }
-  ]
+	"info": {
+		"_postman_id": "06cdc4b9-0f53-4dbd-b6cd-255ec19f2dad",
+		"name": "Catalog_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "/users",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/users",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"{{$randomUserName}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"age\": {{$randomInt}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/users",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/users/1",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"users",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id/playlist",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/users/1/playlist",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"users",
+								"1",
+								"playlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id/suggestions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/users/1/suggestions",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"users",
+								"1",
+								"suggestions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id/playlist",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const x = 1 + Math.floor(Math.random() * 30)\r",
+									"pm.globals.set('randomNumber', x);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"movieId\": {{randomNumber}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/users/1/playlist",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"users",
+								"1",
+								"playlist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id/suggestions",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const x = 1 + Math.floor(Math.random() * 30)\r",
+									"pm.globals.set('randomNumber', x);\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"movieId\": {{randomNumber}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/users/1/suggestions",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"users",
+								"1",
+								"suggestions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id/playlist Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/users/1/playlist",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"users",
+								"1",
+								"playlist"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/movies",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/movies",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"movies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"{{$randomNoun}}\",\r\n  \"director\": 2,\r\n  \"ageRating\": 16,\r\n  \"durationMinutes\": {{$randomInt}},\r\n  \"popularity\": 9.1,\r\n  \"casting\": [1,2,3],\r\n  \"genres\": [1, 2, 3]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/movies",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"movies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/movies/1",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"movies",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"{{$randomNoun}}\",\r\n  \"director\": 1,\r\n  \"ageRating\": 16,\r\n  \"durationMinutes\": {{$randomInt}},\r\n  \"popularity\": 9.1,\r\n  \"casting\": [1,2,3],\r\n  \"genres\": [1, 2, 3]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/movies/1",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"movies",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/genres",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/genres",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"genres"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"{{$randomNoun}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/genres",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"genres"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/genres/1",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"genres",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"{{$randomNoun}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/genres/1",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"genres",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/people",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/people",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"people"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"{{$randomNoun}}\",\r\n  \"job\": \"actor\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/people",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"people"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api}}/people/1",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"people",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/:id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"{{$randomNoun}}\",\r\n  \"job\": \"director\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{api}}/people/1",
+							"host": [
+								"{{api}}"
+							],
+							"path": [
+								"people",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "api",
+			"value": "http://localhost:5000"
+		}
+	]
 }
