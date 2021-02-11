@@ -8,7 +8,7 @@ DROP TABLE IF EXISTS account CASCADE;
 DROP TABLE IF EXISTS people CASCADE;
 DROP TABLE IF EXISTS genre CASCADE;
 DROP TABLE IF EXISTS movie CASCADE;
-DROP TABLE IF EXISTS movie_cast CASCADE;
+DROP TABLE IF EXISTS movie_casting CASCADE;
 DROP TABLE IF EXISTS movie_genres CASCADE;
 DROP TABLE IF EXISTS account_playlist CASCADE;
 DROP TABLE IF EXISTS account_suggestions CASCADE;
@@ -53,7 +53,7 @@ CREATE TABLE movie
 -- TABLE JOINS
 -- --------------------
 
-CREATE TABLE movie_cast
+CREATE TABLE movie_casting
 (
   movie_id BIGINT NOT NULL REFERENCES movie(movie_id),
   people_id BIGINT NOT NULL REFERENCES people(people_id),
@@ -81,13 +81,11 @@ CREATE TABLE account_suggestions
   PRIMARY KEY (account_id, movie_id)
 );
 
-COMMIT;
-
 -- --------------------
 -- TABLE VIEWS
 -- --------------------
 
-CREATE OR REPLACE VIEW movie_full AS
+CREATE OR REPLACE VIEW view_movie_full AS
   SELECT
     movie.movie_id,
     movie.title,
@@ -95,255 +93,132 @@ CREATE OR REPLACE VIEW movie_full AS
     movie.duration_minutes,
     movie.popularity,
     to_json(people_director.*) AS director,
-    json_agg(people_cast.* ORDER BY people_cast.people_id) AS cast,
-    json_agg(genre.* ORDER BY movie_genres.genre_id) AS genres
+    json_agg(DISTINCT people_casting.*) AS casting,
+    json_agg(DISTINCT genre.*) AS genres
   FROM movie
-  INNER JOIN movie_cast ON movie_cast.movie_id = movie.movie_id
+  INNER JOIN movie_casting ON movie_casting.movie_id = movie.movie_id
   INNER JOIN people AS people_director ON people_director.people_id = movie.director
-  INNER JOIN people AS people_cast ON people_cast.people_id = movie_cast.people_id
+  INNER JOIN people AS people_casting ON people_casting.people_id = movie_casting.people_id
   INNER JOIN movie_genres ON movie_genres.movie_id = movie.movie_id
   INNER JOIN genre ON genre.genre_id = movie_genres.genre_id
   GROUP BY movie.movie_id, people_director.people_id
   ORDER BY movie_id;
 
-CREATE OR REPLACE VIEW account_full AS
+CREATE OR REPLACE VIEW view_account_full AS
   SELECT 
     account.*,
-    json_agg(movie_full_playlist.* ORDER BY movie_full_playlist.movie_id) AS playlist,
-    json_agg(movie_full_suggestions.* ORDER BY movie_full_suggestions.movie_id) AS suggestions
+    json_agg(movie_playlist.* ORDER BY movie_playlist.movie_id) AS playlist,
+    json_agg(movie_suggestions.* ORDER BY movie_suggestions.movie_id) AS suggestions
   FROM account
   INNER JOIN account_playlist on account_playlist.account_id = account.account_id
-  INNER JOIN movie_full AS movie_full_playlist on movie_full_playlist.movie_id = account_playlist.movie_id
-  INNER JOIN movie_full AS movie_full_suggestions on movie_full_suggestions.movie_id = account_playlist.movie_id
-  GROUP BY account.account_id;
+  INNER JOIN movie AS movie_playlist on movie_playlist.movie_id = account_playlist.movie_id
+  INNER JOIN movie AS movie_suggestions on movie_suggestions.movie_id = account_playlist.movie_id
+  GROUP BY account.account_id
+  ORDER BY account.account_id;
+
+CREATE OR REPLACE VIEW view_account_playlist_full AS
+  SELECT view_movie_full.*, account_id FROM account_playlist
+  INNER JOIN view_movie_full on view_movie_full.movie_id = account_playlist.movie_id
+  ORDER BY view_movie_full.movie_id;
+
+CREATE OR REPLACE VIEW view_account_suggestions_full AS
+  SELECT view_movie_full.*, account_id FROM account_suggestions
+  INNER JOIN view_movie_full on view_movie_full.movie_id = account_suggestions.movie_id
+  ORDER BY view_movie_full.movie_id;
 
 -- --------------------
 -- TEST DATA
 -- --------------------
 
-BEGIN;
+INSERT INTO account (name, email, age) VALUES
+  ('Antoine', 'mail1@example.com', 23),
+  ('Adrien', 'mail2@example.com', 47),
+  ('Louna', 'mail3@example.com', 19),
+  ('Morgane', 'mail4@example.com', 19)
+;
 
-INSERT INTO account (name, email, age) VALUES ('Antoine', 'mail1@example.com', 23);
-INSERT INTO account (name, email, age) VALUES ('Adrien', 'mail2@example.com', 47);
-INSERT INTO account (name, email, age) VALUES ('Louna', 'mail3@example.com', 19);
-INSERT INTO account (name, email, age) VALUES ('Morgane', 'mail4@example.com', 19);
+INSERT INTO people (name, roles) VALUES
+  ('Christian Bale', 'director'), ('Humphrey Bogart', 'director'), ('Marlon Brando', 'director'), ('Michael Caine', 'director'),
+  ('Charles Chaplin', 'director'), ('Tom Cruise', 'director'), ('Daniel Day-Lewis', 'director'), ('Robert De Niro', 'director'),
+  ('Leonardo DiCaprio', 'director'), ('Clint Eastwood', 'director'), ('Clark Gable', 'actor'), ('Cary Grant', 'actor'), ('Tom Hanks', 'actor'),
+  ('Charlton Heston', 'actor'), ('Dustin Hoffman', 'actor'), ('Philip Seymour Hoffman', 'actor'), ('Anthony Hopkins', 'actor'), ('Paul Newman', 'actor'),
+  ('Jack Nicholson', 'actor'), ('Peter OToole', 'actor'), ('Gary Oldman', 'actor,director'), ('Laurence Olivier', 'actor,director'),
+  ('Al Pacino', 'actor,director'), ('Gregory Peck', 'actor,director'), ('Sean Penn', 'actor,director'), ('Joaquin Phoenix', 'actor,director'),
+  ('Sidney Poitier', 'actor,director'), ('Kevin Spacey', 'actor,director'), ('James Stewart', 'actor,director'), ('Denzel Washington', 'actor,director')
+;
 
-INSERT INTO people (name, roles) VALUES ('Christian Bale', 'director');
-INSERT INTO people (name, roles) VALUES ('Humphrey Bogart', 'director');
-INSERT INTO people (name, roles) VALUES ('Marlon Brando', 'director');
-INSERT INTO people (name, roles) VALUES ('Michael Caine', 'director');
-INSERT INTO people (name, roles) VALUES ('Charles Chaplin', 'director');
-INSERT INTO people (name, roles) VALUES ('Tom Cruise', 'director');
-INSERT INTO people (name, roles) VALUES ('Daniel Day-Lewis', 'director');
-INSERT INTO people (name, roles) VALUES ('Robert De Niro', 'director');
-INSERT INTO people (name, roles) VALUES ('Leonardo DiCaprio', 'director');
-INSERT INTO people (name, roles) VALUES ('Clint Eastwood', 'director');
-INSERT INTO people (name, roles) VALUES ('Clark Gable', 'actor');
-INSERT INTO people (name, roles) VALUES ('Cary Grant', 'actor');
-INSERT INTO people (name, roles) VALUES ('Tom Hanks', 'actor');
-INSERT INTO people (name, roles) VALUES ('Charlton Heston', 'actor');
-INSERT INTO people (name, roles) VALUES ('Dustin Hoffman', 'actor');
-INSERT INTO people (name, roles) VALUES ('Philip Seymour Hoffman', 'actor');
-INSERT INTO people (name, roles) VALUES ('Anthony Hopkins', 'actor');
-INSERT INTO people (name, roles) VALUES ('Paul Newman', 'actor');
-INSERT INTO people (name, roles) VALUES ('Jack Nicholson', 'actor');
-INSERT INTO people (name, roles) VALUES ('Peter OToole', 'actor');
-INSERT INTO people (name, roles) VALUES ('Gary Oldman', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('Laurence Olivier', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('Al Pacino', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('Gregory Peck', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('Sean Penn', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('Joaquin Phoenix', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('Sidney Poitier', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('Kevin Spacey', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('James Stewart', 'actor,director');
-INSERT INTO people (name, roles) VALUES ('Denzel Washington', 'actor,director');
+INSERT INTO genre (name) VALUES
+  ('Action'), ('Fantasy'), ('Biopic'), ('Musical'), ('Dance'), ('Comedy'), ('Romance'), ('Crime'), ('Gangster'), ('Science-Fiction'), ('Superheroes')
+;
 
-INSERT INTO genre (name) VALUES ('Action');
-INSERT INTO genre (name) VALUES ('Fantasy');
-INSERT INTO genre (name) VALUES ('Biopic');
-INSERT INTO genre (name) VALUES ('Musical');
-INSERT INTO genre (name) VALUES ('Dance');
-INSERT INTO genre (name) VALUES ('Comedy');
-INSERT INTO genre (name) VALUES ('Romance');
-INSERT INTO genre (name) VALUES ('Crime');
-INSERT INTO genre (name) VALUES ('Gangster');
-INSERT INTO genre (name) VALUES ('Science-Fiction');
-INSERT INTO genre (name) VALUES ('Superheroes');
+INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES
+  ('Bad Boys for Life Sony', 1, 16, 92.5, 4.8),
+  ('Sonic the Hedgehog Paramount', 1, 16, 92.5, 4.8),
+  ('Tenet Warner Bros.', 1, 16, 92.5, 4.8),
+  ('Dolittle Universal', 1, 16, 92.5, 4.8),
+  ('Birds of Prey Warner Bros.', 1, 16, 92.5, 4.8),
+  ('The Invisible Man Universal', 1, 16, 92.5, 4.8),
+  ('The Gentlemen Miramax', 1, 16, 92.5, 4.8),
+  ('The Call of the Wild 20th Century Studios', 1, 16, 92.5, 4.8),
+  ('Onward Disney', 1, 16, 92.5, 4.8),
+  ('Mulan Disney', 1, 16, 92.5, 4.8),
+  ('Tanhaji AA Films', 1, 16, 92.5, 4.8),
+  ('Tolo Tolo Medusa Film', 1, 16, 92.5, 4.8),
+  ('The Grudge Sony', 1, 16, 92.5, 4.8),
+  ('Fantasy Island Sony', 1, 16, 92.5, 4.8),
+  ('Underwater Fox', 1, 16, 92.5, 4.8),
+  ('The New Mutants 20th Century Studios', 1, 16, 92.5, 4.8),
+  ('Unhinged Solstice Studios', 1, 16, 92.5, 4.8),
+  ('Like a Boss Paramount', 1, 16, 92.5, 4.8),
+  ('Bloodshot Sony', 1, 16, 92.5, 4.8),
+  ('Emma Focus Features', 1, 16, 92.5, 4.8),
+  ('Trolls World Tour Universal', 1, 16, 92.5, 4.8),
+  ('Gretel & Hansel United Artists Releasing', 1, 16, 92.5, 4.8),
+  ('Scoob! Warner Bros.', 1, 16, 92.5, 4.8),
+  ('Brahms: The Boy II STX Entertainment', 1, 16, 92.5, 4.8),
+  ('The Turning Universal', 1, 16, 92.5, 4.8),
+  ('The Way Back Warner Bros.', 1, 16, 92.5, 4.8),
+  ('La Belle Epoque ', 1, 16, 92.5, 4.8),
+  ('I Still Believe ', 1, 16, 92.5, 4.8),
+  ('The Hunt ', 1, 16, 92.5, 4.8),
+  ('Las Pildoras De Mi Novio ', 1, 16, 92.5, 4.8)
+;
 
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Bad Boys for Life Sony', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Sonic the Hedgehog Paramount', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Tenet Warner Bros.', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Dolittle Universal', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Birds of Prey Warner Bros.', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('The Invisible Man Universal', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('The Gentlemen Miramax', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('The Call of the Wild 20th Century Studios', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Onward Disney', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Mulan Disney', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Tanhaji AA Films', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Tolo Tolo Medusa Film', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('The Grudge Sony', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Fantasy Island Sony', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Underwater Fox', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('The New Mutants 20th Century Studios', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Unhinged Solstice Studios', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Like a Boss Paramount', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Bloodshot Sony', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Emma Focus Features', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Trolls World Tour Universal', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Gretel & Hansel United Artists Releasing', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Scoob! Warner Bros.', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Brahms: The Boy II STX Entertainment', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('The Turning Universal', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('The Way Back Warner Bros.', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('La Belle Epoque ', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('I Still Believe ', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('The Hunt ', 1, 16, 92.5, 4.8);
-INSERT INTO movie (title, director, age_rating, duration_minutes, popularity) VALUES ('Las Pildoras De Mi Novio ', 1, 16, 92.5, 4.8);
+INSERT INTO movie_casting (movie_id, people_id) VALUES
+  (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1), (9, 1), (10, 1), (11, 1), (12, 1), (13, 1), (14, 1), (15, 1),
+  (16, 1), (17, 1), (18, 1), (19, 1), (20, 1), (21, 1), (22, 1), (23, 1), (24, 1), (25, 1), (26, 1), (27, 1), (28, 1), (29, 1), (30, 1),
 
-INSERT INTO movie_cast (movie_id, people_id) VALUES (1, 2);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (10, 11);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (11, 27);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (12, 8);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (12, 9);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (13, 27);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (14, 15);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (14, 29);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (15, 13);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (15, 8);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (18, 2);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (18, 24);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (18, 29);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (2, 3);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (21, 24);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (22, 1);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (22, 22);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (22, 5);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (23, 15);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (24, 14);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (24, 16);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (25, 10);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (28, 3);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (29, 26);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (5, 10);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (5, 2);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (6, 30);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (6, 6);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (7, 21);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (7, 5);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (8, 30);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (8, 4);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (9, 14);
-INSERT INTO movie_cast (movie_id, people_id) VALUES (9, 6);
+  (1, 2), (10, 11), (11, 27), (12, 8), (12, 9), (13, 27), (14, 15), (14, 29), (15, 13), (15, 8), (18, 2), (18, 24), (18, 29),
+  (2, 3), (21, 24), (22, 2), (22, 22), (22, 5), (23, 15), (24, 14), (24, 16), (25, 10), (28, 3), (29, 26), (5, 10), (5, 2),
+  (6, 30), (6, 6), (7, 21), (7, 5), (8, 30), (8, 4), (9, 14), (9, 6)
+;
 
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (1, 1);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (1, 4);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (1, 6);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (11, 11);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (12, 4);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (14, 3);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (15, 3);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (16, 9);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (17, 6);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (19, 6);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (2, 10);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (2, 6);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (20, 8);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (21, 1);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (21, 5);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (23, 8);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (25, 1);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (25, 6);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (27, 1);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (27, 10);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (28, 4);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (29, 10);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (29, 11);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (3, 10);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (4, 4);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (5, 1);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (5, 2);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (5, 5);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (6, 2);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (6, 7);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (7, 10);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (7, 7);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (8, 1);
-INSERT INTO movie_genres (movie_id, genre_id) VALUES (9, 4);
+INSERT INTO movie_genres (movie_id, genre_id) VALUES
+  (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1), (9, 1), (10, 1), (11, 1), (12, 1), (13, 1), (14, 1), (15, 1),
+  (16, 1), (17, 1), (18, 1), (19, 1), (20, 1), (21, 1), (22, 1), (23, 1), (24, 1), (25, 1), (26, 1), (27, 1), (28, 1), (29, 1), (30, 1),
 
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 10);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 12);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 13);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 14);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 15);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 26);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 27);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 28);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 29);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 7);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 8);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (1, 9);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (2, 10);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (2, 14);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (2, 15);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (2, 17);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (2, 20);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (2, 21);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (2, 5);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (3, 12);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (3, 13);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (3, 15);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (3, 20);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (3, 21);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (3, 22);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (3, 29);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 11);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 18);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 19);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 2);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 22);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 29);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 4);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 5);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 7);
-INSERT INTO account_playlist (account_id, movie_id) VALUES (4, 9);
+  (1, 2), (2, 9), (3, 4), (4, 10), (5, 8), (6, 5), (7, 4), (8, 10), (9, 9), (10, 10), (11, 2), (12, 10), (13, 2), (14, 9), (15, 8),
+  (16, 9), (17, 4), (18, 6), (19, 6), (20, 4), (21, 2), (22, 6), (23, 4), (24, 9), (25, 6), (26, 10), (27, 4), (28, 4), (29, 2), (30, 11),
+  (1, 6), (2, 4), (3, 2), (4, 8), (5, 6), (6, 2), (7, 5), (8, 2), (9, 3), (10, 11), (11, 10), (12, 9), (13, 4), (14, 4), (15, 2),
+  (16, 8), (17, 2), (18, 7), (19, 5), (20, 2), (21, 10), (22, 9), (23, 3), (24, 10), (25, 2), (26, 2), (27, 3), (28, 2), (29, 9), (30, 7)
+;
 
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (1, 10);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (1, 17);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (1, 22);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (1, 28);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (1, 3);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (1, 4);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (1, 5);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 1);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 2);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 14);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 16);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 22);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 26);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 30);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 6);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 9);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (2, 10);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 1);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 2);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 15);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 16);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 24);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 25);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 26);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 27);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 29);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (3, 30);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 1);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 11);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 13);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 16);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 22);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 23);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 24);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 28);
-INSERT INTO account_suggestions (account_id, movie_id) VALUES (4, 3);
+INSERT INTO account_playlist (account_id, movie_id) VALUES
+  (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10),
+  (1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20),
+  (1, 21), (1, 22), (1, 23), (1, 24), (1, 25), (1, 26), (1, 27), (1, 28), (1, 29), (1, 30),
+
+  (2, 10), (2, 14), (2, 15), (2, 17), (2, 20), (2, 21), (2, 5), (3, 12), (3, 13), (3, 15), (3, 20), (3, 21),
+  (3, 22), (3, 29), (4, 11), (4, 18), (4, 19), (4, 2), (4, 22), (4, 29), (4, 4), (4, 5), (4, 7), (4, 9)
+;
+
+INSERT INTO account_suggestions (account_id, movie_id) VALUES
+  (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10),
+  (1, 11), (1, 12), (1, 13), (1, 14), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19), (1, 20),
+  (1, 21), (1, 22), (1, 23), (1, 24), (1, 25), (1, 26), (1, 27), (1, 28), (1, 29), (1, 30),
+
+  (2, 10), (2, 14), (2, 15), (2, 17), (2, 20), (2, 21), (2, 5), (3, 12), (3, 13), (3, 15), (3, 20), (3, 21),
+  (3, 22), (3, 29), (4, 11), (4, 18), (4, 19), (4, 2), (4, 22), (4, 29), (4, 4), (4, 5), (4, 7), (4, 9)
+;
 
 COMMIT;
