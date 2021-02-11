@@ -5,10 +5,7 @@ import { sql } from '../db.js'
 
 export const router = Router()
 
-router.get('/', async (req, res) => {
-  const rows = await sql`SELECT * FROM view_movie_full`
-  res.json(rows)
-})
+router.get('/', async (req, res) => res.json(await sql`SELECT * FROM view_movie_full`))
 
 router.post('/', async (req, res) => {
   const { title, director, ageRating, durationMinutes, popularity, casting, genres } = req.body

@@ -14,6 +14,12 @@ DROP TABLE IF EXISTS account_playlist CASCADE;
 DROP TABLE IF EXISTS account_suggestions CASCADE;
 
 -- --------------------
+-- TYPES
+-- --------------------
+
+CREATE TYPE people_job AS ENUM ('director', 'actor');
+
+-- --------------------
 -- MAIN TABLES
 -- --------------------
 
@@ -30,7 +36,7 @@ CREATE TABLE people
 (
   people_id SERIAL NOT NULL PRIMARY KEY,
   name VARCHAR(128) NOT NULL,
-  roles VARCHAR(128) NOT NULL
+  job people_job NOT NULL
 );
 
 CREATE TABLE genre
@@ -137,14 +143,14 @@ INSERT INTO account (name, email, age) VALUES
   ('Morgane', 'mail4@example.com', 19)
 ;
 
-INSERT INTO people (name, roles) VALUES
+INSERT INTO people (name, job) VALUES
   ('Christian Bale', 'director'), ('Humphrey Bogart', 'director'), ('Marlon Brando', 'director'), ('Michael Caine', 'director'),
   ('Charles Chaplin', 'director'), ('Tom Cruise', 'director'), ('Daniel Day-Lewis', 'director'), ('Robert De Niro', 'director'),
   ('Leonardo DiCaprio', 'director'), ('Clint Eastwood', 'director'), ('Clark Gable', 'actor'), ('Cary Grant', 'actor'), ('Tom Hanks', 'actor'),
   ('Charlton Heston', 'actor'), ('Dustin Hoffman', 'actor'), ('Philip Seymour Hoffman', 'actor'), ('Anthony Hopkins', 'actor'), ('Paul Newman', 'actor'),
-  ('Jack Nicholson', 'actor'), ('Peter OToole', 'actor'), ('Gary Oldman', 'actor,director'), ('Laurence Olivier', 'actor,director'),
-  ('Al Pacino', 'actor,director'), ('Gregory Peck', 'actor,director'), ('Sean Penn', 'actor,director'), ('Joaquin Phoenix', 'actor,director'),
-  ('Sidney Poitier', 'actor,director'), ('Kevin Spacey', 'actor,director'), ('James Stewart', 'actor,director'), ('Denzel Washington', 'actor,director')
+  ('Jack Nicholson', 'actor'), ('Peter OToole', 'actor'), ('Gary Oldman', 'director'), ('Laurence Olivier', 'director'),
+  ('Al Pacino', 'director'), ('Gregory Peck', 'director'), ('Sean Penn', 'director'), ('Joaquin Phoenix', 'director'),
+  ('Sidney Poitier', 'director'), ('Kevin Spacey', 'director'), ('James Stewart', 'director'), ('Denzel Washington', 'director')
 ;
 
 INSERT INTO genre (name) VALUES

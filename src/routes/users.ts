@@ -5,9 +5,7 @@ import { sql } from '../db.js'
 
 export const router = Router()
 
-router.get('/', async (req, res) => {
-  res.json(await sql`SELECT * FROM account`)
-})
+router.get('/', async (req, res) => res.json(await sql`SELECT * FROM account`))
 
 router.post('/', async (req, res) => {
   const { name, email, age } = req.body
@@ -24,7 +22,11 @@ router.get('/:accountId', async (req, res) => {
 
 router.get('/:accountId/playlist', async (req, res) => {
   const { accountId } = req.params
-  const rows = await sql`SELECT movie_id, title, age_rating, duration_minutes, popularity, director, casting, genres FROM view_account_playlist_full WHERE account_id = ${accountId}`
+  const rows = await sql`
+    SELECT movie_id, title, age_rating, duration_minutes, popularity, director, casting, genres
+    FROM view_account_playlist_full
+    WHERE account_id = ${accountId}
+  `
   res.json(rows)
 })
 
@@ -42,7 +44,11 @@ router.put('/:accountId/playlist', async (req, res) => {
 
 router.get('/:accountId/suggestions', async (req, res) => {
   const { accountId } = req.params
-  const rows = await sql`SELECT movie_id, title, age_rating, duration_minutes, popularity, director, casting, genres FROM view_account_suggestions_full WHERE account_id = ${accountId}`
+  const rows = await sql`
+    SELECT movie_id, title, age_rating, duration_minutes, popularity, director, casting, genres
+    FROM view_account_suggestions_full
+    WHERE account_id = ${accountId}
+  `
   res.json(rows)
 })
 
