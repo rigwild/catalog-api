@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS movie_casting CASCADE;
 DROP TABLE IF EXISTS movie_genres CASCADE;
 DROP TABLE IF EXISTS account_playlist CASCADE;
 DROP TABLE IF EXISTS account_suggestions CASCADE;
+DROP TYPE IF EXISTS people_job CASCADE;
 
 -- --------------------
 -- TYPES
