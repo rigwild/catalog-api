@@ -32,15 +32,15 @@ psql
 
 CREATE DATABASE db_movies;
 \c db_movies
-\i db_movies
+\i db_movies.sql
 
 CREATE DATABASE db_suggestions;
 \c db_suggestions
-\i db_suggestions
+\i db_suggestions.sql
 
 CREATE DATABASE db_users;
 \c db_users
-\i db_users
+\i db_users.sql
 ```
 
 ### Start microservices

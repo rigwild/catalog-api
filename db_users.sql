@@ -27,7 +27,7 @@ CREATE TABLE account
 CREATE TABLE account_playlist
 (
   account_id BIGINT NOT NULL REFERENCES account(account_id),
-  movie_id BIGINT NOT NULL REFERENCES movie(movie_id),
+  movie_id BIGINT,
   PRIMARY KEY (account_id, movie_id)
 );
 
@@ -38,8 +38,7 @@ CREATE TABLE account_playlist
 CREATE OR REPLACE VIEW view_account_full AS
   SELECT 
     account.*,
-    json_agg(movie_playlist.* ORDER BY movie_playlist.movie_id) AS playlist,
-    json_agg(movie_suggestions.* ORDER BY movie_suggestions.movie_id) AS suggestions
+    json_agg(account_playlist.* ORDER BY account_playlist.movie_id) AS playlist
   FROM account
   INNER JOIN account_playlist on account_playlist.account_id = account.account_id
   GROUP BY account.account_id

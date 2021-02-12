@@ -5,18 +5,25 @@ import { createAppServer } from '../../app.js'
 
 // Redis KV
 const stats = {
-  rentCount: 0
+  rentCount: 0,
+  rentCountPerMovie: {} as Record<string, number>
 }
 
 export const router = Router()
 
 router.get('/', async (req, res) => res.json(stats))
 
-router.post('/:statName/increment', async (req, res) => {
+router.post('/singleStats/:statName/increment', async (req, res) => {
   const { statName } = req.params
-  const name = statName as keyof typeof stats
+  const name = statName as keyof Omit<typeof stats, 'rentCountPerMovie'>
   stats[name] = (stats[name] || 0) + 1
   res.status(201).json(stats.rentCount)
+})
+
+router.post('/rentCountPerMovie/:movieId/increment', async (req, res) => {
+  const { movieId } = req.params
+  stats.rentCountPerMovie[movieId] = (stats.rentCountPerMovie[movieId] || 0) + 1
+  res.status(201).json(stats.rentCountPerMovie[movieId])
 })
 
 export const importRouters = (app: Express) => {
