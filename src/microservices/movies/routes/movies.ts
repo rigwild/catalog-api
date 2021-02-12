@@ -1,7 +1,7 @@
 import Router from 'express-promise-router'
 import boom from '@hapi/boom'
 
-import { sql } from '../db.js'
+import { sql } from '../../../db.js'
 
 export const router = Router()
 

@@ -1,8 +1,17 @@
 # Catalog API
 
-## Install
+## Available microservices
 
-### Prerequisites
+ - [movies](./src/microservices/movies)
+ - [stats](./src/microservices/stats)
+ - [suggestions](./src/microservices/suggestions)
+ - [users](./src/microservices/users)
+
+## Run on system
+
+### Install
+
+#### Prerequisites
 
  - Node.js v12.0.0+
  - PostgreSQL v9.6.0+
@@ -13,33 +22,52 @@ Install Node.js dependencies
 yarn # or npm i -D
 ```
 
-Create a PostgreSQL database and import the database (see [db.sql](./db.sql))
+Create PostgreSQL databases and import them:
+ - See [db_movies.sql](./db_movies.sql)
+ - See [db_suggestions.sql](./db_suggestions.sql)
+ - See [db_users.sql](./db_users.sql)
 
 ```
 psql
-CREATE DATABASE catalog_api;
-\c catalog_api
-\i db.sql
+
+CREATE DATABASE db_movies;
+\c db_movies
+\i db_movies
+
+CREATE DATABASE db_suggestions;
+\c db_suggestions
+\i db_suggestions
+
+CREATE DATABASE db_users;
+\c db_users
+\i db_users
 ```
 
-## Run
+### Start microservices
 
 ```sh
-PGUSER=myuser PGPASSWORD=mysecurepassword yarn start:ts
-# or PGUSER=myuser PGPASSWORD=mysecurepassword npm run start:ts
+PGUSER=myuser PGPASSWORD=mysecurepassword yarn start:movies:ts
+PGUSER=myuser PGPASSWORD=mysecurepassword yarn start:stats:ts
+PGUSER=myuser PGPASSWORD=mysecurepassword yarn start:suggestions:ts
+PGUSER=myuser PGPASSWORD=mysecurepassword yarn start:users:ts
 ```
 
-## Build Docker image
+## Run with Docker
+
+### Build Docker images
+
+This process shouldn't take too long as the Node.js dependencies installation image layer is cached by Docker.
 
 ```
-docker build -t rigwild/catalog-api .
+docker build -t rigwild/app_movies -f app.movies.Dockerfile .
+docker build -t rigwild/app_stats -f app.stats.Dockerfile .
+docker build -t rigwild/app_suggestions -f app.suggestions.Dockerfile .
+docker build -t rigwild/app_users -f app.users.Dockerfile .
 ```
 
-## Run with docker-compose
+### Start with docker-compose
 
-You need to [Build the Docker image](#build-docker-image) first.
-
-The database is automatically imported and the app starts on http://localhost:5000.
+You need to [Build the Docker images](#build-docker-images) first.
 
 ```
 docker-compose up

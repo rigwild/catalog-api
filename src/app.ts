@@ -1,16 +1,8 @@
 import express from 'express'
 import boom from '@hapi/boom'
+import cors from 'cors'
 
-import { importRouters } from './routes/index.js'
-
-export const app = express()
-
-app.use(express.json({ limit: '50mb' }))
-
-importRouters(app)
-
-// @ts-ignore
-app.use((err, req, res, next) => {
+const errorMiddleware: express.ErrorRequestHandler = (err, req, res, next) => {
   // Check whether the error is a boom error
   if (!err.isBoom) {
     // Check if error is invalid JSON body
@@ -36,4 +28,13 @@ app.use((err, req, res, next) => {
   })
 
   next()
-})
+}
+
+export const createAppServer = (importRouters: (app: express.Express) => void): express.Express => {
+  const app = express()
+  app.use(express.json({ limit: '50mb' }))
+  app.use(cors())
+  app.use(errorMiddleware)
+  importRouters(app)
+  return app
+}

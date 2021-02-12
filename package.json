@@ -7,17 +7,26 @@
   "scripts": {
     "prebuild": "rm -rf dist/*",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "start:ts": "node --loader ts-node/esm ./src/index.ts"
+    "start:movies": "node dist/microservices/movies/index.js",
+    "start:stats": "node dist/microservices/stats/index.js",
+    "start:suggestions": "node dist/microservices/suggestions/index.js",
+    "start:users": "node dist/microservices/users/index.js",
+    "----": "",
+    "start:ts:movies": "node --loader ts-node/esm ./src/microservices/movies/index.ts",
+    "start:ts:stats": "node --loader ts-node/esm ./src/microservices/stats/index.ts",
+    "start:ts:suggestions": "node --loader ts-node/esm ./src/microservices/suggestions/index.ts",
+    "start:ts:users": "node --loader ts-node/esm ./src/microservices/users/index.ts"
   },
   "dependencies": {
     "@hapi/boom": "^9.1.1",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-promise-router": "^4.0.1",
     "postgres": "^2.0.0-beta.3"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",
+    "@types/cors": "^2.8.9",
     "@types/express": "^4.17.11",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.4"

@@ -1,24 +1,84 @@
-version: "3.1"
+version: "3.7"
 
 services:
-  db:
+  ######################
+  # DATABASES
+  ######################
+
+  db_movies:
     image: postgres
     restart: always
     volumes:
-      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./db_movies.sql:/docker-entrypoint-initdb.d/db.sql
     environment:
-      POSTGRES_DB: catalog_api
+      POSTGRES_DB: db_movies
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
-  app:
-    image: rigwild/catalog-api
+  db_suggestions:
+    image: postgres
+    restart: always
+    volumes:
+      - ./db_suggestions.sql:/docker-entrypoint-initdb.d/db.sql
+    environment:
+      POSTGRES_DB: db_suggestions
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+  
+  db_users:
+    image: postgres
+    restart: always
+    volumes:
+      - ./db_users.sql:/docker-entrypoint-initdb.d/db.sql
+    environment:
+      POSTGRES_DB: db_users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+  
+  ######################
+  # APPS
+  ######################
+
+  app_movies:
+    image: rigwild/movie-rental_movies
     restart: always
     depends_on:
       - db
     ports:
-      - "5000:5000"
+      - "8882:8882"
     environment:
-      PGHOST: db
+      PGHOST: db_movies
+      PGUSER : postgres
+      PGPASSWORD : postgres
+
+  app_stats:
+    image: rigwild/movie-rental_stats
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8883:8883"
+
+  app_suggestions:
+    image: rigwild/movie-rental_suggestions
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8882:8882"
+    environment:
+      PGHOST: db_suggestions
+      PGUSER : postgres
+      PGPASSWORD : postgres
+
+  app_users:
+    image: rigwild/movie-rental_users
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8881:8881"
+    environment:
+      PGHOST: db_users
       PGUSER : postgres
       PGPASSWORD : postgres

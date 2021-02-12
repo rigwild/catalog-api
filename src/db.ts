@@ -1,6 +1,6 @@
 import postgres from 'postgres'
 
-export const sql = postgres({ database: 'catalog_api' })
+export const sql = postgres()
 
 // Check if credentials are valid
 try {
